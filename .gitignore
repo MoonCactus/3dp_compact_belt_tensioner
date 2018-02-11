@@ -1,0 +1,14 @@
+obj
+*.orig
+*.o
+*.ino
+*.gch
+*.bak
+*.stl
+*.gcode
+.ide
+.pioenvs
+.piolibdeps
+*.gcode
+*.b#?
+*.s#?
