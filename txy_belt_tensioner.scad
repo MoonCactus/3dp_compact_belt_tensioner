@@ -1,16 +1,17 @@
 /*
  * Belt/puller tensioner for 2020 Aluminum Extrusion
- * This was made for a Tronxy X1 printer, but it obviously
- * would be suitable to any 6mm belt on 20x20 extrusion systems.
+ * This was made for a Tronxy X1 printer, but it would be suitable
+ * to any 6mm belt on 20x20 extrusion systems of course.
  * 
  * jeremie.francois@gmail.com
  * 
  * This thing is inspired by fessyfoo's https://www.thingiverse.com/thing:2502801,
- * but it was rewritten from scratch in Openscad (source was not provided anyway).
- * My goal was mostly to make it more compact and easier to print even.
+ * but it was rewritten from scratch in Openscad. I realized too late that he did
+ * provide the code source as well on https://github.com/fessyfoo/fooyabt-belt-tensioner
+ * My goal was mostly to make it more compact and easier to print.
  * 
  */
-print_what="ring"; // all, body, plunger, ring
+print_what="exploded"; // all, body, plunger, ring, exploded
 
 tol=0.01;
 debug=0;
@@ -236,13 +237,20 @@ difference()
 {
 	union()
 	{
-		if(print_what=="all" || print_what=="body") color([0.9,1,1]) body();
+		if(print_what=="all"  || print_what=="exploded" || print_what=="body")
+			color([0.9,1,1]) body();
 	
-		if(print_what=="all" || print_what=="plunger") translate([0,0,-tot_height-ring_h])
-			plunger();
+		if(print_what=="all" || print_what=="plunger")
+			translate([0,0,-tot_height-ring_h])
+				plunger();
+		else if(print_what=="exploded")
+			translate([plunger_d*1.5,0,-tot_height])
+				plunger();
 		
-		if(print_what=="all" || print_what=="ring") translate([0,0,-tot_height-ring_h-0.1])
-			color([1,0.2,0.2]) ring();
+		color([1,0.2,0.2]) if(print_what=="all" || print_what=="ring")
+			translate([0,0,-tot_height-ring_h-0.1]) ring();
+		else if(print_what=="exploded")
+			translate([0,plunger_d*1.5,-tot_height]) ring();
 	}
 	if(debug) translate([0,0,-tot_height-1]) rotate([0,0,15]) cube(100);
 }
