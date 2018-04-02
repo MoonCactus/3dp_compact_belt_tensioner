@@ -8,12 +8,13 @@
  * This thing is inspired by fessyfoo's https://www.thingiverse.com/thing:2502801,
  * but it was rewritten from scratch in Openscad. I realized too late that he did
  * provide the code source as well on https://github.com/fessyfoo/fooyabt-belt-tensioner
- * My goal was mostly to make it more compact and easier to print.
+ * My goal was to reduce overhangs and convoluted shapes, and to be more compact
+ * (so it will not interfere with the bed and it is suitable for both X and Y axes).
  * 
  */
 print_what="exploded"; // all, body, plunger, ring, exploded
 
-tol=0.01;
+tol=0.05;
 debug=0;
 
 rail_insert_length=6;
@@ -217,11 +218,14 @@ module ring()
 	module nut_shape(d,h)
 	{
 		x1=d/2; x2=x1+h/2;
-		intersection()
+		difference()
 		{
-			cylinder(h=h, r=(d/2)/sin(60), $fn=6);
 			rotate_extrude(convexity=1, $fn=6*round(d*PI/3))
 				polygon([ [0,0],[x1,0],[x2,h/2],[x1,h],[0,h] ]);
+			for(a=[0:15:359]) rotate([0,0,a])
+				translate([(d/2)/sin(60)+2.5,0,-tol])
+					rotate([0,8,0])
+						cylinder(d=8, h=h+2*tol, $fa=0.5,$fs=0.5);
 		}
 	}
 	
