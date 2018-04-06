@@ -12,14 +12,15 @@
  * (so it will not interfere with the bed and it is suitable for both X and Y axes).
  * 
  */
-print_what="exploded"; // all, body, plunger, ring, exploded
+print_what="all"; // all, body, plunger, ring, exploded
 
 tol=0.05;
 debug=0;
 
 rail_insert_length=6;
 
-belt_width= 1+6+1;
+belt_width=6;
+belt_passage= 0.5+belt_width+0.5;
 
 bearing_width= 5.2;
 bearing_id= 5;
@@ -30,7 +31,7 @@ screw_d= 4.8;
 screw_head_d= 8;
 screw_head_recess=2.2;
 
-thread_delta_d= 0.4; // freeplay, added diameter on the ring/nut
+thread_delta_d= 0.5; // freeplay, added inner diameter on the ring/nut
 thread_angle=50; // make printing easier
 thread_pitch=1.8;
 thread_size= 2.1;
@@ -150,10 +151,20 @@ module body()
 		}
 
 		// Main openings
-		translate([0,0,4-tot_height-tol])
+		base_th=4;
+		translate([0,0,base_th-tot_height-tol])
 		{
-			ccube([30, belt_width+2*tol, tot_height+rail_insert_length]); // pulley
-			ccube([screw_head_d+2*tol, 30, tot_height-7-tol]); // screw (bearing axis)
+			hh= tot_height+rail_insert_length-base_th - rail_insert_length;
+			// ccube([30, belt_passage+2*tol, hh+tol]); // pulley
+			ccube([30, belt_passage+2*tol, hh-1]); // pulley
+			translate([0,0,hh-1-tol])
+				hull()
+				{
+					ccube([30, belt_passage+2*tol, tol]); // chamfer
+					translate([0,0,1+tol])
+						ccube([30, belt_passage+2*tol+1, tol*3]); // chamfer
+				}
+			ccube([screw_head_d+2*tol, 30, tot_height-base_th-3-tol]); // screw (bearing #axis)
 		}
 		
 		translate([0,0,-tot_height])
@@ -190,15 +201,15 @@ module plunger()
 			axis_pos()
 				union()
 			{
-				cylinder(d=bearing_od+6, h=belt_width, center=true);
-				cube([30, bearing_od, belt_width],center=true);
+				cylinder(d=bearing_od+6, h=belt_passage, center=true);
+				cube([30, bearing_od, belt_passage],center=true);
 			}
 			
 			axis_pos()
 			{
 				for(s=[-1,1]) scale([1,1,s])
 					translate([0,0,bearing_width/2])
-						cylinder(d1=bearing_ids, d2=bearing_ids+3, h=(belt_width-bearing_width)/2+tol);
+						cylinder(d1=bearing_ids, d2=bearing_ids+3, h=(belt_passage-bearing_width)/2+tol);
 				%cylinder(d=bearing_od, h=bearing_width, center=true);
 			}
 		}
