@@ -10,14 +10,13 @@
  * provide the code source as well on https://github.com/fessyfoo/fooyabt-belt-tensioner
  * My goal was to reduce overhangs and convoluted shapes, and to be more compact
  * (so it will not interfere with the bed and it is suitable for both X and Y axes).
- * 
  */
-print_what="exploded"; // all, body, plunger, ring, exploded
+print_what="all"; // all, body, plunger, ring, exploded
 
 tol=0.05;
 debug=0;
 
-belt_offset=2; // reduce the chance that the belt rubs against the edge of the alu profile
+belt_offset=0; // reduce the chance that the belt rubs against the edge of the alu profile
 
 rail_insert_length=6;
 
