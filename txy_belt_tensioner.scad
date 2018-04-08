@@ -12,10 +12,12 @@
  * (so it will not interfere with the bed and it is suitable for both X and Y axes).
  * 
  */
-print_what="all"; // all, body, plunger, ring, exploded
+print_what="exploded"; // all, body, plunger, ring, exploded
 
 tol=0.05;
 debug=0;
+
+belt_offset=2; // reduce the chance that the belt rubs against the edge of the alu profile
 
 rail_insert_length=6;
 
@@ -58,7 +60,7 @@ axis_dh= tot_height - bearing_od/2 + ring_h;
 
 module axis_pos()
 {
-	translate([0,0,axis_dh])
+	translate([belt_offset,0,axis_dh])
 		rotate([90,0,0])
 			for(c=[0:$children-1])
 				children(c);
@@ -120,7 +122,6 @@ module plunger_body(delta=0., added_h=0, add_delta_d=0,add_delta_h=8)
 			hull()
 			{
 				cylinder(d=plunger_d-delta*2,h=gutterh-4-delta+added_h);
-*				cylinder(d=plunger_d-8-delta*2,h=gutterh-delta+added_h);
 				ccube([(plunger_d-8)*2/3, (plunger_d-8), gutterh-delta+added_h]);
 			}
 			union()
@@ -155,7 +156,6 @@ module body()
 		translate([0,0,base_th-tot_height-tol])
 		{
 			hh= tot_height+rail_insert_length-base_th - rail_insert_length;
-			// ccube([30, belt_passage+2*tol, hh+tol]); // pulley
 			ccube([30, belt_passage+2*tol, hh-1]); // pulley
 			translate([0,0,hh-1-tol])
 				hull()
@@ -164,7 +164,8 @@ module body()
 					translate([0,0,1+tol])
 						ccube([30, belt_passage+2*tol+1, tol*3]); // chamfer
 				}
-			ccube([screw_head_d+2*tol, 30, tot_height-base_th-3-tol]); // screw (bearing #axis)
+			translate([belt_offset,0,0])
+				ccube([screw_head_d+2*tol, 30, tot_height-base_th-3-tol]); // screw (bearing #axis)
 		}
 		
 		translate([0,0,-tot_height])
@@ -176,14 +177,24 @@ module plunger()
 {
 	difference()
 	{
-		union()
+		intersection()
 		{
-			difference()
+			union()
 			{
-				plunger_body(delta=plunger_freeplay, added_h=ring_h);
-				cylinder(d=plunger_d+2, h=thread_h-tol);
+				difference()
+				{
+					plunger_body(delta=plunger_freeplay, added_h=ring_h);
+					cylinder(d=plunger_d+2, h=thread_h-tol);
+				}
+				metric_thread(diameter=plunger_d, length=thread_h, pitch=thread_pitch, thread_size=thread_size, angle=thread_angle, leadin=2, internal=false);
 			}
-			metric_thread(diameter=plunger_d, length=thread_h, pitch=thread_pitch, thread_size=thread_size, angle=thread_angle, leadin=2, internal=false);
+			// Bottom chamfer
+			union() translate([0,0,-tol])
+			{
+				cylinder(d1=plunger_d-2, d2=plunger_d+tol,h=1);
+				translate([0,0,1-tol])
+					cylinder(d=plunger_d+tol,h=gutterh-plunger_freeplay+ring_h+3*tol);
+			}
 		}
 		plunger_rails(delta=plunger_freeplay, added_h= ring_h);
 
@@ -216,7 +227,7 @@ module plunger()
 		
 		axis_pos()
 		{
-			cylinder(d=screw_d,h=30, $fa=1,$fs=1);
+			cylinder(d=screw_d,h=30);
 			scale([1,1,-1]) cylinder(d=bearing_id,h=30, $fa=1,$fs=1);
 		}
 	}
